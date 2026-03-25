@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Oncall Overload is a mobile-first, lane-defense/reaction web game built as a technical playground for exploring Web Haptics and AWS CloudWatch RUM. The player controls an engineer emoji defending a "Home" workstation (💻🤨💻) from incoming oncall tickets (Bugs 🐛, Alarms 🚨, Customer Reports 🤷) that fall from the top of the screen. The game runs at 60 FPS using a useRef-based game loop in React (Vite + TypeScript), is distributed via CloudFront + S3 (CDK), and emits observability telemetry to CloudWatch RUM via Cognito Identity Pools.
+Oncall Overload is a mobile-first, lane-defense/reaction web game built as a technical playground for exploring Web Haptics and AWS CloudWatch RUM. The player controls an engineer emoji defending a Workstation_Area (💻🤨💻) from incoming oncall tickets (Bugs 🐛, Alarms 🚨, Customer Reports 🤷) that fall from the top of the screen. The game runs at 60 FPS using a useRef-based game loop in React (Vite + TypeScript), is distributed via CloudFront + S3 (CDK), and emits observability telemetry to CloudWatch RUM via Cognito Identity Pools.
 
 ---
 
@@ -13,9 +13,9 @@ Oncall Overload is a mobile-first, lane-defense/reaction web game built as a tec
 - **Play_Area**: The rectangular region of the screen where Tickets fall and can be tapped, spanning the full viewport width.
 - **Ticket_Width**: The horizontal width of a Ticket entity in pixels.
 - **Player**: The engineer emoji controlled by the user.
-- **Stress_System**: The 3-life mechanic that tracks how many Tickets have breached the Home threshold.
-- **Home**: The bottom threshold line representing the engineer's workstation.
-- **Breach**: The event that occurs when a Ticket crosses the Home threshold without being resolved.
+- **Stress_System**: The 3-life mechanic that tracks how many Tickets have breached the Workstation_Area.
+- **Workstation_Area**: The 80px zone at the bottom of the Play_Area representing the engineer's workstation. Tickets breach when their bottom edge enters this zone.
+- **Breach**: The event that occurs when a Ticket enters the Workstation_Area without being resolved.
 - **Streak**: A consecutive count of resolved Tickets without a Breach, tracked internally but not displayed to the player.
 - **Score**: The total count of Tickets resolved by the player across all rounds in the current game session.
 - **High_Score**: The highest Score value achieved across all game sessions, persisted in browser localStorage.
@@ -77,13 +77,13 @@ Oncall Overload is a mobile-first, lane-defense/reaction web game built as a tec
 
 ### Requirement 4: Player Input and Ticket Resolution
 
-**User Story:** As a player, I want to tap or click on a falling Ticket to resolve it, so that I can prevent it from breaching the Home threshold.
+**User Story:** As a player, I want to tap or click on a falling Ticket to resolve it, so that I can prevent it from breaching the Workstation_Area.
 
 #### Acceptance Criteria
 
 1. WHEN the player taps or clicks within the Play_Area, THE Game SHALL determine if the tap position intersects with any Ticket's bounding box.
-2. WHEN the player taps or clicks on a Ticket that is within a 120px vertical hit window above the Home threshold, THE Game SHALL resolve that Ticket.
-3. IF multiple Tickets are within tap range of the player's input position, THEN THE Game SHALL resolve the lowest Ticket (closest to the Home threshold).
+2. A Ticket is resolvable as long as its bottom edge has not yet crossed into the Workstation_Area. WHEN the player taps or clicks on a resolvable Ticket, THE Game SHALL resolve that Ticket.
+3. IF multiple Tickets intersect with the player's input position, THEN THE Game SHALL resolve the Ticket whose center is closest to the tap/click coordinate.
 4. WHEN a Ticket is resolved, THE Game SHALL increment the Score by 1 and increment the Streak counter by 1.
 5. WHEN the player taps or clicks a position that does not intersect with any resolvable Ticket, THE Game SHALL register a miss and trigger the Haptic_Engine with the "Miss" pattern.
 6. WHEN a Ticket is resolved, THE Game SHALL trigger the Haptic_Engine with the "Success" pattern.
@@ -93,16 +93,31 @@ Oncall Overload is a mobile-first, lane-defense/reaction web game built as a tec
 
 ### Requirement 5: Stress System (Lives)
 
-**User Story:** As a player, I want to see my engineer's stress level degrade as Tickets breach the Home threshold, so that I feel the pressure of the oncall experience.
+**User Story:** As a player, I want to see my engineer's stress level degrade as Tickets breach the Workstation_Area, so that I feel the pressure of the oncall experience.
 
 #### Acceptance Criteria
 
 1. THE Stress_System SHALL initialise with 3 lives and a Player emoji state of 🤨.
-2. WHEN a Ticket crosses the Home threshold without being resolved (a Breach), THE Stress_System SHALL decrement the life count by 1 and trigger the Haptic_Engine with the "Breach" pattern.
+2. WHEN a Ticket enters the Workstation_Area without being resolved (a Breach), THE Stress_System SHALL decrement the life count by 1 and trigger the Haptic_Engine with the "Breach" pattern.
 3. WHEN the life count reaches 2, THE Stress_System SHALL update the Player emoji to 😟.
 4. WHEN the life count reaches 1, THE Stress_System SHALL update the Player emoji to 😫.
-5. WHEN the life count reaches 0, THE Stress_System SHALL transition the game to the Game Over state and update the Player emoji to 😵.
-6. THE Game SHALL display the current stress emoji in the Home area, centered and flanked by computer emojis in the format: 💻[stress_emoji]💻.
+5. WHEN the life count reaches 0, THE Stress_System SHALL update the Player emoji to 😵, freeze all in-flight Tickets in place, and pause the Game_Loop for 1 second before transitioning to the Game Over state.
+6. THE Game SHALL display the current stress emoji in the Workstation_Area, centered and flanked by computer emojis in the format: 💻[stress_emoji]💻.
+7. THE Workstation_Area SHALL be visually distinct from the Play_Area (e.g. a different background color, border, or dividing line) so the player can clearly identify the breach threshold.
+8. WHEN a Ticket breaches the Workstation_Area, THE Game SHALL immediately remove the Ticket from the Play_Area with a brief fade-out animation; the Ticket SHALL NOT continue falling below the threshold.
+
+---
+
+### Requirement 18: Ticket Animation Effects
+
+**User Story:** As a player, I want visual feedback when I resolve or miss a ticket, so that the game feels responsive and satisfying.
+
+#### Acceptance Criteria
+
+1. WHEN a Ticket is resolved by the player, THE Game SHALL play a pixel burst animation at the Ticket's position — the emoji scatters into small colored pixels that fade out over approximately 200ms.
+2. WHEN a Ticket breaches the Workstation_Area, THE Game SHALL play a glitch dissolve animation on the Ticket — the emoji breaks apart with a scanline/glitch effect and fades out over approximately 200ms.
+3. WHEN a Ticket breaches the Workstation_Area, THE Game SHALL trigger a brief red screen flash overlay over the Play_Area that fades out over approximately 150ms.
+4. ALL Ticket animations SHALL be non-blocking — they SHALL NOT pause the game loop or prevent new Tickets from spawning or falling.
 
 ---
 

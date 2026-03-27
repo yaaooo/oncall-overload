@@ -562,7 +562,7 @@ Streak Reset: Breach or Miss
 
 ### Property 60: Start Screen Instructions Display
 
-*For any* Start Screen, the instructions text should include "survive for seven days", "miss too many tickets and you lose", and "clear many tickets to boost your mood".
+*For any* Start Screen, the instructions text should include "survive for seven days", "miss too many tickets and you lose", and "clear 10 tickets to boost your mood".
 
 **Validates: Requirements 2.2**
 
@@ -781,7 +781,9 @@ The MVP does not provision Lambda, EC2, ECS, or RDS resources.
 
 ### Color Palette
 
-- **Background**: #1a1a2e (dark navy)
+- **Background (Play_Area)**: #1a1a2e (dark navy)
+- **Workstation_Area Background**: #0d0d1a (deeper navy, visually distinct from play area)
+- **Workstation_Area Border**: #00ff00 top border (neon green, 2px, marks the breach threshold)
 - **Primary Text**: #00ff00 (neon green)
 - **Secondary Text**: #ffff00 (neon yellow)
 - **Accent**: #ff00ff (neon magenta)

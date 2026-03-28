@@ -641,6 +641,27 @@ If localStorage is unavailable (private browsing, quota exceeded), high score pe
 
 Each correctness property must be implemented by a single property-based test that generates random inputs and verifies the property holds.
 
+### Component Testing with Ladle
+
+**Ladle** is used for visual testing and manual vetting of stateless UI components in isolation. Ladle provides a lightweight, Vite-native component development environment.
+
+**Components with Ladle Stories**:
+- `TicketEntity.tsx` - Visual states for all ticket types (bug, alarm, customer report) at various positions
+- `WorkstationArea.tsx` - All stress emoji states (🤨, 😟, 😫, 😵)
+- `PixelBurst.tsx` - Animation trigger and visual effect
+- `GlitchDissolve.tsx` - Glitch animation effect
+- `RedFlash.tsx` - Screen flash overlay effect
+- `HUD.tsx` - Score display, high score, round display with various values
+- `StartScreen.tsx` - Initial screen with instructions and high score
+- `RoundTransition.tsx` - Day name transitions for all 7 days
+- `GameOver.tsx` - Game over screen with various scores
+- `Victory.tsx` - Victory screen with final score
+
+**Ladle Configuration**:
+- Stories located in `src/**/*.stories.tsx` alongside components
+- Run with `npm run ladle` for local development
+- Provides visual regression testing and component documentation
+
 ### Integration Testing
 
 - Full game session from Start Screen through Victory/Game Over

@@ -1,9 +1,9 @@
 import { useRef, useEffect, useCallback } from "react";
-import { GameLoopState, Ticket } from "../types";
+import type { GameLoopState, Ticket } from "../types";
 import { initStressState, applyBreach } from "../game/stressSystem";
 import { spawnTicket, getRandomSpawnInterval } from "../game/ticketUtils";
 import { isTicketResolvable } from "../game/collisionUtils";
-import { WORKSTATION_HEIGHT } from "../constants";
+import hapticEngine from "../haptics/HapticEngine";
 
 interface UseGameLoopOptions {
   viewportWidth: number;
@@ -55,6 +55,9 @@ export function useGameLoop({
           stateRef.current = applyBreach(stateRef.current);
           stateRef.current.totalBreaches++;
           stateRef.current.lastBreachEventTime = Date.now();
+
+          // Trigger haptic feedback for breach
+          hapticEngine.trigger("Breach");
 
           // Check for game over
           if (stateRef.current.lives <= 0) {
@@ -123,8 +126,9 @@ export function useGameLoop({
         spawnTickets(deltaTime);
 
         // Notify parent of state update
+        // Clone the state object to trigger React re-renders
         if (onStateUpdate) {
-          onStateUpdate(stateRef.current);
+          onStateUpdate({ ...stateRef.current });
         }
       }
 

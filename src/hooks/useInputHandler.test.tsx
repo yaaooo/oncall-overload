@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import * as fc from "fast-check";
 import { renderHook } from "@testing-library/react";
 import { useInputHandler } from "./useInputHandler";
-import { Ticket } from "../types";
+import type { Ticket } from "../types";
 import { TICKET_SIZE } from "../constants";
 import { HapticContext, HapticEngine } from "../haptics/HapticEngine";
 import React from "react";

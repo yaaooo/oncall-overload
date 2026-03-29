@@ -187,42 +187,42 @@ Incremental implementation of the Oncall Overload game with UI-first approach: p
   - Verify game logic utilities work correctly in isolation
   - Ensure game loop and input handling are functional
 
-- [ ] 8. Implement HapticEngine and wire haptic callsites
-  - [ ] 8.1 Implement `src/haptics/HapticEngine.ts`: singleton class using `web-haptics` library with `trigger("Success" | "Miss" | "Breach")`, Vibration API detection on init, silent no-op on unsupported browsers; export `HapticContext` via `React.createContext`
+- [x] 8. Implement HapticEngine and wire haptic callsites
+  - [x] 8.1 Implement `src/haptics/HapticEngine.ts`: singleton class using `web-haptics` library with `trigger("Success" | "Miss" | "Breach")`, Vibration API detection on init, silent no-op on unsupported browsers; export `HapticContext` via `React.createContext`
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-  - [ ] 8.2 Write property tests for HapticEngine (fast-check)
+  - [x] 8.2 Write property tests for HapticEngine (fast-check)
     - **Property 22: Haptic Patterns Defined Correctly** — Validates: Requirements 7.1
     - **Property 23: Haptic Engine Graceful Degradation** — Validates: Requirements 7.3
 
-  - [ ] 8.3 Update `src/hooks/useInputHandler.ts`: add haptic triggers — on hit → `haptic.trigger("Success")`; on miss → `haptic.trigger("Miss")`
+  - [x] 8.3 Update `src/hooks/useInputHandler.ts`: add haptic triggers — on hit → `haptic.trigger("Success")`; on miss → `haptic.trigger("Miss")`
     - _Requirements: 4.5, 4.6_
 
-  - [ ] 8.4 Update property tests for input handling to verify haptic triggers
+  - [x] 8.4 Update property tests for input handling to verify haptic triggers
     - **Property 11: Success Haptic on Resolution** — Validates: Requirements 4.6
 
-  - [ ] 8.5 Update `src/hooks/useGameLoop.ts`: add haptic trigger on breach → `haptic.trigger("Breach")`
+  - [x] 8.5 Update `src/hooks/useGameLoop.ts`: add haptic trigger on breach → `haptic.trigger("Breach")`
     - _Requirements: 5.2_
 
-- [ ] 9. Checkpoint — Haptic engine complete
+- [x] 9. Checkpoint — Haptic engine complete
   - Run all tests including haptic-related property tests
   - Manually test haptic feedback on supported devices
   - Verify graceful degradation on unsupported browsers
 
-- [ ] 10. Wire everything together in GameContainer and App
-  - [ ] 10.1 Implement `src/GameContainer.tsx`: React state machine (`screen`, `roundNumber`, `highScore`); mounts `useGameLoop` and `useInputHandler`; routes to `StartScreen`, `RoundTransition`, `PlayArea`+`HUD`, `GameOver`, `Victory` based on screen state; handles `onRoundComplete` → round transition → next round or victory; handles `onGameOver` → 1s freeze → game over screen
+- [x] 10. Wire everything together in GameContainer and App
+  - [x] 10.1 Implement `src/GameContainer.tsx`: React state machine (`screen`, `roundNumber`, `highScore`); mounts `useGameLoop` and `useInputHandler`; routes to `StartScreen`, `RoundTransition`, `PlayArea`+`HUD`, `GameOver`, `Victory` based on screen state; handles `onRoundComplete` → round transition → next round or victory; handles `onGameOver` → 1s freeze → game over screen
     - _Requirements: 1.1, 1.2, 5.5, 12.3, 12.5, 14.1, 15.1_
 
-  - [ ] 10.2 Implement `src/App.tsx`: wraps `GameContainer` with `HapticContext.Provider` (singleton `HapticEngine`); loads high score from localStorage on mount
+  - [x] 10.2 Implement `src/App.tsx`: wraps `GameContainer` with `HapticContext.Provider` (singleton `HapticEngine`); loads high score from localStorage on mount
     - _Requirements: 7.4, 13.3, 13.4_
 
-  - [ ] 10.3 Write property tests for game state machine (fast-check)
+  - [x] 10.3 Write property tests for game state machine (fast-check)
     - **Property 48: Score Persistence Within Session** — Validates: Requirements 13.5
 
-  - [ ] 10.4 Update screen components to handle high score persistence: `GameOver.tsx` and `Victory.tsx` should call `saveHighScore()` on mount if score exceeds stored value
+  - [x] 10.4 Update screen components to handle high score persistence: `GameOver.tsx` and `Victory.tsx` should call `saveHighScore()` on mount if score exceeds stored value
     - _Requirements: 14.5, 15.6_
 
-- [ ] 11. Checkpoint — Full game integration complete
+- [x] 11. Checkpoint — Full game integration complete
   - Run full integration test: play through a complete game session
   - Verify all screens transition correctly
   - Test score persistence across game sessions

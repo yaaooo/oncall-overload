@@ -1,10 +1,10 @@
 import { useEffect, useCallback, useRef, useContext } from "react";
-import { Ticket } from "../types";
+import type { Ticket } from "../types";
 import { getResolvableTicket } from "../game/collisionUtils";
 import { HapticContext } from "../haptics/HapticEngine";
 
 interface UseInputHandlerOptions {
-  playAreaRef: React.RefObject<HTMLElement>;
+  playAreaRef: React.RefObject<HTMLElement | null>;
   playAreaHeight: number;
   tickets: Ticket[];
   onResolve: (ticket: Ticket) => void;

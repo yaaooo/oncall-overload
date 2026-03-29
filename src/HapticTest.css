@@ -1,0 +1,158 @@
+.haptic-test {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: "Press Start 2P", monospace;
+  background-color: #1a1a2e;
+  color: #00ff00;
+  min-height: 100vh;
+}
+
+.haptic-test h1 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #00ff00;
+}
+
+.haptic-test h2 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #ffff00;
+}
+
+.support-status {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 2px solid #00ff00;
+  background-color: #0d0d1a;
+}
+
+.support-status p {
+  margin: 0.5rem 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.support-status .supported {
+  color: #00ff00;
+}
+
+.support-status .unsupported {
+  color: #ff00ff;
+}
+
+.support-status .note {
+  color: #ffff00;
+  margin-top: 1rem;
+}
+
+.test-buttons {
+  margin-bottom: 2rem;
+}
+
+.test-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.75rem;
+  border: 2px solid;
+  background-color: #0d0d1a;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.test-button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px currentColor;
+}
+
+.test-button:active {
+  transform: scale(0.98);
+}
+
+.test-button.success {
+  border-color: #00ff00;
+  color: #00ff00;
+}
+
+.test-button.miss {
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+.test-button.breach {
+  border-color: #ff00ff;
+  color: #ff00ff;
+}
+
+.test-button .emoji {
+  font-size: 2rem;
+}
+
+.test-button .label {
+  font-size: 1rem;
+}
+
+.test-button .spec {
+  font-size: 0.5rem;
+  opacity: 0.7;
+}
+
+.instructions {
+  padding: 1rem;
+  border: 2px solid #ffff00;
+  background-color: #0d0d1a;
+}
+
+.instructions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instructions li {
+  margin-bottom: 1rem;
+  font-size: 0.6rem;
+  line-height: 1.5;
+  color: #00ff00;
+}
+
+.instructions strong {
+  color: #ffff00;
+}
+
+@media (max-width: 600px) {
+  .haptic-test {
+    padding: 1rem;
+  }
+
+  .haptic-test h1 {
+    font-size: 1rem;
+  }
+
+  .haptic-test h2 {
+    font-size: 0.75rem;
+  }
+
+  .test-button {
+    padding: 1rem;
+  }
+
+  .test-button .emoji {
+    font-size: 1.5rem;
+  }
+
+  .test-button .label {
+    font-size: 0.75rem;
+  }
+
+  .instructions li {
+    font-size: 0.5rem;
+  }
+}

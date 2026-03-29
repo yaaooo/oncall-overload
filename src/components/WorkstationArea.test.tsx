@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import { render } from "@testing-library/react";
 import { WorkstationArea } from "./WorkstationArea";
-import { StressEmoji } from "../types";
+import type { StressEmoji } from "../types";
 
 describe("WorkstationArea", () => {
   describe("Feature: oncall-overload, Property 16: Emoji Display Format", () => {

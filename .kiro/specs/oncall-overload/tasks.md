@@ -6,7 +6,7 @@ Incremental implementation of the Oncall Overload game with UI-first approach: p
 
 ## Tasks
 
-- [-] 1. Scaffold project, define core types, and set up Ladle
+- [x] 1. Scaffold project, define core types, and set up Ladle
   - Initialize Vite + React + TypeScript project with `npm create vite@latest oncall-overload -- --template react-ts`
   - Install dependencies: `fast-check`, `web-haptics`, `aws-rum-web`, `@fontsource/press-start-2p`, `@ladle/react` (dev)
   - Create `src/types.ts` defining `GameState`, `GameLoopState`, `Ticket`, `TicketType`, `StressEmoji` interfaces
@@ -15,96 +15,96 @@ Incremental implementation of the Oncall Overload game with UI-first approach: p
   - Configure Ladle: add `"ladle": "ladle serve"` script to package.json, create `.ladle/config.mjs` if needed for custom configuration
   - _Requirements: 1.1, 3.4, 10.3, 17.1, 17.2_
 
-- [ ] 2. Build core reusable UI components with Ladle stories
-  - [ ] 2.1 Implement `src/components/TicketEntity.tsx`: 50×50px div positioned absolutely at `(x, y)`, renders ticket emoji with retro styling; accepts `onPixelBurst` animation trigger prop
+- [x] 2. Build core reusable UI components with Ladle stories
+  - [x] 2.1 Implement `src/components/TicketEntity.tsx`: 50×50px div positioned absolutely at `(x, y)`, renders ticket emoji with retro styling; accepts `onPixelBurst` animation trigger prop
     - _Requirements: 3.4, 17.2_
 
-  - [ ] 2.2 Create `src/components/TicketEntity.stories.tsx`: stories for all ticket types (bug 🐛, alarm 🚨, customer report 🤷) at various positions and states
+  - [x] 2.2 Create `src/components/TicketEntity.stories.tsx`: stories for all ticket types (bug 🐛, alarm 🚨, customer report 🤷) at various positions and states
 
-  - [ ] 2.3 Implement `src/components/WorkstationArea.tsx`: 80px bottom strip, `#0d0d1a` background, `2px solid #00ff00` top border; renders `💻{stressEmoji}💻` centered in Press Start 2P font
+  - [x] 2.3 Implement `src/components/WorkstationArea.tsx`: 80px bottom strip, `#0d0d1a` background, `2px solid #00ff00` top border; renders `💻{stressEmoji}💻` centered in Press Start 2P font
     - _Requirements: 5.6, 5.7_
 
-  - [ ] 2.4 Create `src/components/WorkstationArea.stories.tsx`: stories for all stress emoji states (🤨, 😟, 😫, 😵)
+  - [x] 2.4 Create `src/components/WorkstationArea.stories.tsx`: stories for all stress emoji states (🤨, 😟, 😫, 😵)
 
-  - [ ] 2.5 Implement `src/components/animations/PixelBurst.tsx`: 8–12 colored pixel particles scattered from center, CSS opacity transition over 200ms, purely visual overlay (no game state)
+  - [x] 2.5 Implement `src/components/animations/PixelBurst.tsx`: 8–12 colored pixel particles scattered from center, CSS opacity transition over 200ms, purely visual overlay (no game state)
     - _Requirements: 18.1, 18.4_
 
-  - [ ] 2.6 Create `src/components/animations/PixelBurst.stories.tsx`: story demonstrating pixel burst animation trigger
+  - [x] 2.6 Create `src/components/animations/PixelBurst.stories.tsx`: story demonstrating pixel burst animation trigger
 
-  - [ ] 2.7 Implement `src/components/animations/GlitchDissolve.tsx`: scanline/glitch CSS transform jitter fading over 200ms
+  - [x] 2.7 Implement `src/components/animations/GlitchDissolve.tsx`: scanline/glitch CSS transform jitter fading over 200ms
     - _Requirements: 18.2, 18.4_
 
-  - [ ] 2.8 Create `src/components/animations/GlitchDissolve.stories.tsx`: story demonstrating glitch dissolve animation
+  - [x] 2.8 Create `src/components/animations/GlitchDissolve.stories.tsx`: story demonstrating glitch dissolve animation
 
-  - [ ] 2.9 Implement `src/components/animations/RedFlash.tsx`: `rgba(255,0,0,0.25)` full-PlayArea overlay fading over 150ms
+  - [x] 2.9 Implement `src/components/animations/RedFlash.tsx`: `rgba(255,0,0,0.25)` full-PlayArea overlay fading over 150ms
     - _Requirements: 18.3, 18.4_
 
-  - [ ] 2.10 Create `src/components/animations/RedFlash.stories.tsx`: story demonstrating red flash overlay
+  - [x] 2.10 Create `src/components/animations/RedFlash.stories.tsx`: story demonstrating red flash overlay
 
-  - [ ] 2.11 Implement `src/components/HUD.tsx`: `ScoreDisplay` (top-left, "Tickets Resolved: {score}" + "High Score: {highScore}" in `#00ff00`), `RoundDisplay` (top-right, current day name in `#ffff00`), `LivesDisplay` (delegated to WorkstationArea)
+  - [x] 2.11 Implement `src/components/HUD.tsx`: `ScoreDisplay` (top-left, "Tickets Resolved: {score}" + "High Score: {highScore}" in `#00ff00`), `RoundDisplay` (top-right, current day name in `#ffff00`), `LivesDisplay` (delegated to WorkstationArea)
     - _Requirements: 13.1, 13.2, 12.6, 6.5_
 
-  - [ ] 2.12 Create `src/components/HUD.stories.tsx`: stories with various score, high score, and round values
+  - [x] 2.12 Create `src/components/HUD.stories.tsx`: stories with various score, high score, and round values
 
-  - [ ] 2.13 Implement `src/components/PlayArea.tsx`: full-viewport div (`100vw × 100vh`, max `800px` wide centered), dark navy background `#1a1a2e`; renders `Ticket` components and `WorkstationArea` (without input handling for now)
+  - [x] 2.13 Implement `src/components/PlayArea.tsx`: full-viewport div (`100vw × 100vh`, max `800px` wide centered), dark navy background `#1a1a2e`; renders `Ticket` components and `WorkstationArea` (without input handling for now)
     - _Requirements: 10.1, 10.2, 10.4_
 
-  - [ ] 2.14 Create `src/components/PlayArea.stories.tsx`: stories demonstrating responsive layout at various viewport widths
+  - [x] 2.14 Create `src/components/PlayArea.stories.tsx`: stories demonstrating responsive layout at various viewport widths
 
-- [ ] 3. Checkpoint — Core UI components complete
+- [x] 3. Checkpoint — Core UI components complete
   - Verify all Ladle stories render correctly by running `npm run ladle`
   - Manually vet each component's visual appearance and retro aesthetic
   - Ensure all components are stateless and accept props correctly
 
-- [ ] 4. Build screen components with Ladle stories
-  - [ ] 4.1 Implement `src/screens/StartScreen.tsx`: Press Start 2P font, retro palette; instructions text ("survive for seven days", "miss too many tickets and you lose", "clear 10 tickets to boost your mood"), high score display, "Start" button
+- [x] 4. Build screen components with Ladle stories
+  - [x] 4.1 Implement `src/screens/StartScreen.tsx`: Press Start 2P font, retro palette; instructions text ("survive for seven days", "miss too many tickets and you lose", "clear 10 tickets to boost your mood"), high score display, "Start" button
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ] 4.2 Create `src/screens/StartScreen.stories.tsx`: stories with various high score values
+  - [x] 4.2 Create `src/screens/StartScreen.stories.tsx`: stories with various high score values
 
-  - [ ] 4.3 Implement `src/screens/RoundTransition.tsx`: fade-in day name text → brief hold → fade-out → brief pause; fires `onComplete` callback
+  - [x] 4.3 Implement `src/screens/RoundTransition.tsx`: fade-in day name text → brief hold → fade-out → brief pause; fires `onComplete` callback
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7_
 
-  - [ ] 4.4 Create `src/screens/RoundTransition.stories.tsx`: stories for all 7 day names (Monday-Sunday)
+  - [x] 4.4 Create `src/screens/RoundTransition.stories.tsx`: stories for all 7 day names (Monday-Sunday)
 
-  - [ ] 4.5 Implement `src/screens/GameOver.tsx`: displays final score, "Play Again" button; retro styling
+  - [x] 4.5 Implement `src/screens/GameOver.tsx`: displays final score, "Play Again" button; retro styling
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
 
-  - [ ] 4.6 Create `src/screens/GameOver.stories.tsx`: stories with various final scores
+  - [x] 4.6 Create `src/screens/GameOver.stories.tsx`: stories with various final scores
 
-  - [ ] 4.7 Implement `src/screens/Victory.tsx`: displays "Shift Completed!", final score, rounds completed (7), "Play Again" button; retro styling
+  - [x] 4.7 Implement `src/screens/Victory.tsx`: displays "Shift Completed!", final score, rounds completed (7), "Play Again" button; retro styling
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6_
 
-  - [ ] 4.8 Create `src/screens/Victory.stories.tsx`: stories with various final scores
+  - [x] 4.8 Create `src/screens/Victory.stories.tsx`: stories with various final scores
 
-- [ ] 5. Checkpoint — Screen components complete
+- [x] 5. Checkpoint — Screen components complete
   - Verify all screen Ladle stories render correctly
   - Manually vet visual consistency and retro aesthetic across all screens
   - Ensure proper button interactions and layout responsiveness
 
-- [ ] 6. Implement game engine utilities and property tests
-  - [ ] 6.1 Implement `src/game/ticketUtils.ts`: `spawnTicket(viewportWidth, score, roundNumber, existingTickets)` returning a new `Ticket` with random x (clamped to `[0, viewportWidth - TICKET_SIZE]`), random type, speed derived from score/round, and unique x vs existing tickets
+- [x] 6. Implement game engine utilities and property tests
+  - [x] 6.1 Implement `src/game/ticketUtils.ts`: `spawnTicket(viewportWidth, score, roundNumber, existingTickets)` returning a new `Ticket` with random x (clamped to `[0, viewportWidth - TICKET_SIZE]`), random type, speed derived from score/round, and unique x vs existing tickets
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-  - [ ] 6.2 Write property tests for `spawnTicket` (fast-check)
+  - [x] 6.2 Write property tests for `spawnTicket` (fast-check)
     - **Property 3: Ticket Fall Speed Increases with Score** — Validates: Requirements 3.3
     - **Property 4: Ticket X-Coordinate Remains On-Screen** — Validates: Requirements 3.5
     - **Property 5: No Simultaneous Spawn Collision** — Validates: Requirements 3.6
     - **Property 36: Ticket Count Per Round** — Validates: Requirements 12.2
     - **Property 38: Speed Scaling Between Rounds** — Validates: Requirements 12.4
 
-  - [ ] 6.3 Implement `src/game/collisionUtils.ts`: `getResolvableTicket(tickets, tapX, tapY, playAreaHeight)` returning the closest-center ticket whose bounding box intersects the tap and whose bottom edge is above the Workstation_Area threshold
+  - [x] 6.3 Implement `src/game/collisionUtils.ts`: `getResolvableTicket(tickets, tapX, tapY, playAreaHeight)` returning the closest-center ticket whose bounding box intersects the tap and whose bottom edge is above the Workstation_Area threshold
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [ ] 6.4 Write property tests for collision detection (fast-check)
+  - [x] 6.4 Write property tests for collision detection (fast-check)
     - **Property 6: Bounding Box Intersection Detection** — Validates: Requirements 4.1
     - **Property 7: Resolvability Above Workstation_Area** — Validates: Requirements 4.2
     - **Property 8: Closest Ticket Priority** — Validates: Requirements 4.3
 
-  - [ ] 6.5 Implement `src/game/stressSystem.ts`: `applyBreach(state)`, `applyResolution(state)`, `applyMiss(state)`, `getStressEmoji(lives)`, `initStressState()` — pure functions operating on `GameLoopState`
+  - [x] 6.5 Implement `src/game/stressSystem.ts`: `applyBreach(state)`, `applyResolution(state)`, `applyMiss(state)`, `getStressEmoji(lives)`, `initStressState()` — pure functions operating on `GameLoopState`
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 6.1, 6.2, 6.3, 6.4_
 
-  - [ ] 6.6 Write property tests for stress system (fast-check)
+  - [x] 6.6 Write property tests for stress system (fast-check)
     - **Property 9: Score and Streak Increment on Resolution** — Validates: Requirements 4.4
     - **Property 13: Stress System Initial State** — Validates: Requirements 5.1
     - **Property 14: Breach Decrements Lives and Triggers Haptic** — Validates: Requirements 5.2
@@ -114,75 +114,75 @@ Incremental implementation of the Oncall Overload game with UI-first approach: p
     - **Property 19: Miss Resets Streak** — Validates: Requirements 6.3
     - **Property 20: Recovery Improves Emoji State** — Validates: Requirements 6.4
 
-  - [ ] 6.7 Implement `src/game/roundUtils.ts`: `getTicketsForRound(round)`, `getSpeedBoundsForRound(round)`, `getDayName(round)`, `isVictory(round, lives)`
+  - [x] 6.7 Implement `src/game/roundUtils.ts`: `getTicketsForRound(round)`, `getSpeedBoundsForRound(round)`, `getDayName(round)`, `isVictory(round, lives)`
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 16.3_
 
-  - [ ] 6.8 Write property tests for round utilities (fast-check)
+  - [x] 6.8 Write property tests for round utilities (fast-check)
     - **Property 35: Seven Rounds Structure** — Validates: Requirements 12.1
     - **Property 37: Round Transition on Completion** — Validates: Requirements 12.3
     - **Property 39: Victory Condition** — Validates: Requirements 12.5
     - **Property 43: Day Name Display Correctness** — Validates: Requirements 16.3
 
-  - [ ] 6.9 Implement `src/game/scoreUtils.ts`: `loadHighScore()`, `saveHighScore(score)` with localStorage key `oncall_overload_high_score` and graceful fallback to 0
+  - [x] 6.9 Implement `src/game/scoreUtils.ts`: `loadHighScore()`, `saveHighScore(score)` with localStorage key `oncall_overload_high_score` and graceful fallback to 0
     - _Requirements: 13.3, 13.4, 13.6_
 
-  - [ ] 6.10 Write property tests for score persistence (fast-check)
+  - [x] 6.10 Write property tests for score persistence (fast-check)
     - **Property 46: High Score localStorage Loading** — Validates: Requirements 13.3
     - **Property 47: High Score Default Initialization** — Validates: Requirements 13.4
     - **Property 49: High Score Cross-Session Persistence** — Validates: Requirements 13.6
 
-  - [ ] 6.11 Implement `src/hooks/useGameLoop.ts`: `useRef`-based `GameLoopState`, `requestAnimationFrame` loop with `setTimeout` fallback, `visibilitychange` pause/resume, delta-time tick updating ticket y-positions, breach detection calling `applyBreach`, spawn timer calling `spawnTicket`, `onRoundComplete` callback when all round tickets exhausted
+  - [x] 6.11 Implement `src/hooks/useGameLoop.ts`: `useRef`-based `GameLoopState`, `requestAnimationFrame` loop with `setTimeout` fallback, `visibilitychange` pause/resume, delta-time tick updating ticket y-positions, breach detection calling `applyBreach`, spawn timer calling `spawnTicket`, `onRoundComplete` callback when all round tickets exhausted
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 3.1, 3.7, 5.2, 5.5, 11.4_
 
-  - [ ] 6.12 Write property tests for game loop (fast-check)
+  - [x] 6.12 Write property tests for game loop (fast-check)
     - **Property 1: Game Loop Pause-Resume Preserves State** — Validates: Requirements 1.2, 1.4
     - **Property 2: Ticket Spawn Intervals Within Bounds** — Validates: Requirements 3.1
     - **Property 34: RequestAnimationFrame Fallback** — Validates: Requirements 11.4
 
-  - [ ] 6.13 Implement `src/hooks/useInputHandler.ts`: unified touch + mouse handler calling `getResolvableTicket`; on hit → `applyResolution`; on miss → `applyMiss`; prevent default scroll/zoom; single-touch-only guard (haptic calls will be added in next phase)
+  - [x] 6.13 Implement `src/hooks/useInputHandler.ts`: unified touch + mouse handler calling `getResolvableTicket`; on hit → `applyResolution`; on miss → `applyMiss`; prevent default scroll/zoom; single-touch-only guard (haptic calls will be added in next phase)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.7, 10.3_
 
-  - [ ] 6.14 Write property tests for input handling (fast-check)
+  - [x] 6.14 Write property tests for input handling (fast-check)
     - **Property 10: Miss Detection and Haptic Trigger** — Validates: Requirements 4.5
     - **Property 12: Touch and Mouse Input Equivalence** — Validates: Requirements 4.7
 
-  - [ ] 6.15 Write property tests for responsive layout (fast-check)
+  - [x] 6.15 Write property tests for responsive layout (fast-check)
     - **Property 30: Responsive Layout Scaling** — Validates: Requirements 10.1
     - **Property 31: Wide Viewport Scaling** — Validates: Requirements 10.2
     - **Property 32: Orientation Change Responsiveness** — Validates: Requirements 10.4
 
-  - [ ] 6.16 Write unit tests for WorkstationArea
+  - [x] 6.16 Write unit tests for WorkstationArea
     - **Property 16: Emoji Display Format** — Validates: Requirements 5.6
 
-  - [ ] 6.17 Write property tests for HUD (fast-check)
+  - [x] 6.17 Write property tests for HUD (fast-check)
     - **Property 21: Streak Not Displayed in UI** — Validates: Requirements 6.5
     - **Property 40: Round Number Display** — Validates: Requirements 12.6
     - **Property 44: Score Display Persistence** — Validates: Requirements 13.1
     - **Property 45: High Score Display** — Validates: Requirements 13.2
 
-  - [ ] 6.18 Write property tests for StartScreen (fast-check)
+  - [x] 6.18 Write property tests for StartScreen (fast-check)
     - **Property 59: Start Screen Inactive Game Loop** — Validates: Requirements 2.6
     - **Property 60: Start Screen Instructions Display** — Validates: Requirements 2.2
     - **Property 61: Start Button Initiates Gameplay** — Validates: Requirements 2.5
 
-  - [ ] 6.19 Write property tests for RoundTransition (fast-check)
+  - [x] 6.19 Write property tests for RoundTransition (fast-check)
     - **Property 41: Round Transition Animation Execution** — Validates: Requirements 16.1
     - **Property 42: Spawn Pause During Transition** — Validates: Requirements 16.2
 
-  - [ ] 6.20 Write property tests for GameOver (fast-check)
+  - [x] 6.20 Write property tests for GameOver (fast-check)
     - **Property 50: Game Over State Transition** — Validates: Requirements 14.1
     - **Property 51: Game Over Score Display** — Validates: Requirements 14.2
     - **Property 52: Game Over Play Again Reset** — Validates: Requirements 14.4
     - **Property 53: Game Over High Score Update** — Validates: Requirements 14.5
 
-  - [ ] 6.21 Write property tests for Victory (fast-check)
+  - [x] 6.21 Write property tests for Victory (fast-check)
     - **Property 54: Victory State Transition** — Validates: Requirements 15.1
     - **Property 55: Victory Score Display** — Validates: Requirements 15.2
     - **Property 56: Victory Rounds Display** — Validates: Requirements 15.3
     - **Property 57: Victory Play Again Reset** — Validates: Requirements 15.5
     - **Property 58: Victory High Score Update** — Validates: Requirements 15.6
 
-- [ ] 7. Checkpoint — Game engine and tests complete
+- [x] 7. Checkpoint — Game engine and tests complete
   - Run all property tests and ensure they pass: `npm test`
   - Verify game logic utilities work correctly in isolation
   - Ensure game loop and input handling are functional

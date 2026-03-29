@@ -655,6 +655,143 @@ it('calls onStart when button clicked', () => {
 });
 ```
 
+## Storybook Validation (Ladle)
+
+**CRITICAL**: Every reusable component MUST be validated in Ladle before considering it complete. This ensures components render correctly in isolation before integration.
+
+### Validation Process
+
+After creating a component and its stories:
+
+1. **Start Ladle server**: `npm run ladle`
+2. **Open browser**: Navigate to http://localhost:61001/
+3. **Inspect each story**: Verify visual appearance matches design
+4. **Check browser DevTools**:
+   - Inspect DOM structure
+   - Verify CSS variables are applied correctly
+   - Check for console errors or warnings
+   - Validate responsive behavior at different viewport sizes
+5. **Test interactions**: Click buttons, hover states, animations
+6. **Verify text visibility**: Ensure all text is readable (check font loading, colors, contrast)
+
+### Common Issues to Check
+
+**CSS Variables Not Applied**:
+- Stories must define CSS variables inline if they use `var(--variable-name)`
+- Import `@fontsource/press-start-2p` in story files if using Press Start 2P font
+
+```typescript
+// ✅ Good - CSS variables defined in story container
+const storyContainer = {
+  position: "relative" as const,
+  width: "100%",
+  height: "600px",
+  background: "#1a1a2e",
+  "--primary-text": "#00ff00",
+  "--secondary-text": "#ffff00",
+  "--accent": "#ff00ff",
+} as React.CSSProperties;
+
+export const MyStory: Story = () => (
+  <div style={storyContainer}>
+    <MyComponent />
+  </div>
+);
+```
+
+**Font Not Loading**:
+- Import font at top of story file: `import "@fontsource/press-start-2p";`
+- Verify font-family is applied in component styles
+
+**Absolute Positioning Issues**:
+- Story container must have `position: "relative"` for absolutely positioned children
+- Provide adequate height for story container (e.g., 600px)
+
+**Background Color Missing**:
+- Story container should match game background: `background: "#1a1a2e"`
+- This ensures proper contrast and visibility
+
+### Story File Template
+
+```typescript
+import type { Story } from "@ladle/react";
+import { MyComponent } from "./MyComponent";
+import "@fontsource/press-start-2p";
+
+const storyContainer = {
+  position: "relative" as const,
+  width: "100%",
+  height: "600px",
+  background: "#1a1a2e",
+  "--primary-text": "#00ff00",
+  "--secondary-text": "#ffff00",
+  "--accent": "#ff00ff",
+  "--bg-workstation": "#0d0d1a",
+  "--workstation-border": "#00ff00",
+} as React.CSSProperties;
+
+export const DefaultState: Story = () => (
+  <div style={storyContainer}>
+    <MyComponent prop1="value1" prop2="value2" />
+  </div>
+);
+
+export const AlternateState: Story = () => (
+  <div style={storyContainer}>
+    <MyComponent prop1="alternate" prop2="value2" />
+  </div>
+);
+```
+
+### Validation Checklist
+
+Before marking a component task as complete:
+
+- [ ] Ladle server starts without errors
+- [ ] All stories load in browser
+- [ ] Text is visible and readable
+- [ ] Colors match design (green #00ff00, yellow #ffff00, magenta #ff00ff)
+- [ ] Font renders correctly (Press Start 2P)
+- [ ] Layout is correct (positioning, sizing, spacing)
+- [ ] Responsive behavior works at different viewport sizes
+- [ ] Animations play correctly (if applicable)
+- [ ] No console errors or warnings
+- [ ] Interactive elements respond to clicks/hovers (if applicable)
+
+### When to Fix Issues
+
+If any validation check fails:
+1. **Stop immediately** - Do not proceed to next task
+2. **Identify root cause** - Use browser DevTools to diagnose
+3. **Fix the issue** - Update component or story file
+4. **Re-validate** - Refresh Ladle and verify fix
+5. **Only then proceed** - Move to next component/task
+
+### Ladle Configuration
+
+Ensure `.ladle/config.mjs` includes responsive width presets:
+
+```javascript
+/** @type {import('@ladle/react').UserConfig} */
+export default {
+  stories: "src/**/*.stories.{tsx,jsx}",
+  addons: {
+    width: {
+      enabled: true,
+      options: {
+        xsmall: 320,
+        small: 375,
+        medium: 768,
+        large: 1024,
+      },
+      defaultState: "small",
+    },
+  },
+};
+```
+
+This allows testing components at different viewport widths directly in Ladle.
+
 ## File Organization
 
 ```

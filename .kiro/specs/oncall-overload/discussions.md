@@ -2,6 +2,104 @@
 
 ---
 
+## Session 3: UI Components with Ladle Validation (March 29, 2026)
+
+**Status**: Tasks 1-7 completed, discovered validation issues with Ladle
+
+### What We Accomplished
+
+**Completed Tasks:**
+- ✅ **Task 1**: Project scaffold, types, constants, global CSS, Ladle setup
+- ✅ **Task 2**: Core reusable UI components with Ladle stories (7 components)
+- ✅ **Task 3**: Checkpoint - Core UI components
+- ✅ **Task 4**: Screen components with Ladle stories (4 screens)
+- ✅ **Task 5**: Checkpoint - Screen components
+- ✅ **Task 6**: Game engine utilities and property tests (21 sub-tasks, 55 tests passing)
+- ✅ **Task 7**: Checkpoint - Game engine and tests complete
+
+**Components Created:**
+- Core: TicketEntity, WorkstationArea, PixelBurst, GlitchDissolve, RedFlash, HUD, PlayArea
+- Screens: StartScreen, RoundTransition, GameOver, Victory
+- All with corresponding Ladle stories
+
+### Critical Issues Discovered
+
+#### Issue 1: Ladle Validation Not Performed
+
+**Problem**: Agent completed Tasks 2 and 4 (UI components) without validating components in Ladle browser UI. This led to undetected rendering issues.
+
+**Specific Failure**: HUD component text was invisible in Ladle stories because CSS variables (`var(--primary-text)`, `var(--secondary-text)`) were not defined in story containers.
+
+**Root Cause**: Agent did not:
+1. Start Ladle server and inspect browser
+2. Check browser DevTools for CSS issues
+3. Verify text visibility and styling
+4. Validate that components render as expected
+
+**Impact**: Components appeared to work (TypeScript compiled, build succeeded) but were actually broken in visual presentation.
+
+**Resolution**:
+- Added "Storybook Validation (Ladle)" section to `.kiro/steering/react-architecture.md`
+- Documented validation checklist and common issues
+- Fixed HUD stories by adding CSS variables inline to story containers
+
+**Lesson Learned**: **CRITICAL** - Every reusable component MUST be validated in Ladle browser before marking task complete. Compilation success ≠ visual correctness.
+
+#### Issue 2: Global Styles Not Applied to Ladle Stories
+
+**Problem**: Agent added CSS variables inline to individual story files (e.g., HUD.stories.tsx) instead of configuring global styles for all Ladle stories.
+
+**Better Approach**: Use Ladle's global configuration to apply styles to all stories:
+- `.ladle/styles.css` - Global CSS for all stories
+- `.ladle/components.tsx` - Global wrapper component with CSS variables
+
+**Status**: User will handle global Ladle styling configuration.
+
+**Note for Future**: When creating Ladle stories, check if global styling is configured. If not, either:
+1. Configure global styles in `.ladle/` directory, OR
+2. Add CSS variables inline to each story container (current approach)
+
+### Vite Compatibility Issue
+
+**Problem**: Vite 8.0.1 incompatible with Ladle 5.1.1
+- Error: "Missing field `moduleType`" with `builtin:vite-react-refresh-wrapper`
+- Ladle server started but components failed to render
+
+**Resolution**: Downgraded to Vite 5.4.11 and @vitejs/plugin-react 4.3.4
+- Ladle now runs cleanly without errors
+- All stories render correctly
+
+### Validation Process Established
+
+**New Requirement**: After creating any component with stories:
+
+1. Start Ladle: `npm run ladle`
+2. Open browser: http://localhost:61001/
+3. Inspect each story visually
+4. Check browser DevTools:
+   - DOM structure
+   - CSS variables applied
+   - Console errors/warnings
+   - Responsive behavior
+5. Verify text visibility, colors, fonts, layout
+6. Test interactions (buttons, hovers, animations)
+7. **Only proceed if all checks pass**
+
+### Next Steps
+
+1. **User will configure global Ladle styles** (`.ladle/styles.css`, `.ladle/components.tsx`)
+2. **Continue with Task 8**: HapticEngine implementation and wiring
+3. **Apply validation process** to all future component work
+
+### Key Takeaways
+
+- **Visual validation is mandatory** - Don't trust compilation alone
+- **Ladle is a critical tool** - Use it to catch CSS/styling issues early
+- **CSS variables need context** - Stories must provide CSS variables that components depend on
+- **Vite version matters** - Ladle requires Vite 5.x for compatibility
+
+---
+
 ## Session 2: Core Game Implementation (March 27, 2026)
 
 **Status**: Tasks 1-3, 5-8 completed and stashed for review

@@ -7,24 +7,37 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ladle": "ladle serve",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/press-start-2p": "^5.2.7",
+    "aws-rum-web": "^2.0.0",
+    "fast-check": "^4.6.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "web-haptics": "^0.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@ladle/react": "^5.1.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/ui": "^4.1.2",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "jsdom": "^29.0.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.57.0",
-    "vite": "^8.0.1"
+    "vite": "^5.4.21",
+    "vitest": "^4.1.2"
   }
 }

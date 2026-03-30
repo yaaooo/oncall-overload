@@ -15,41 +15,37 @@ interface Particle {
   velocityY: number;
 }
 
-const COLORS = [
-  "#ff0000",
-  "#ff6600",
-  "#ffff00",
-  "#00ff00",
-  "#0099ff",
-  "#ff00ff",
-];
+const COLORS = ["#ffff00", "#00ffcc", "#00F3FF"];
+
+const generateParticles = () => {
+  // Generate 8-12 particles
+  const particleCount = Math.floor(Math.random() * 5) + 8;
+  const newParticles: Particle[] = [];
+
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (Math.PI * 2 * i) / particleCount;
+    const speed = Math.random() * 20 + 15;
+    newParticles.push({
+      id: i,
+      x: 0,
+      y: 0,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      velocityX: Math.cos(angle) * speed,
+      velocityY: Math.sin(angle) * speed,
+    });
+  }
+  return newParticles;
+};
 
 export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const [particles] = useState<Particle[]>(generateParticles());
   const [opacity, setOpacity] = useState(1);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   useEffect(() => {
-    // Generate 8-12 particles
-    const particleCount = Math.floor(Math.random() * 5) + 8;
-    const newParticles: Particle[] = [];
-
-    for (let i = 0; i < particleCount; i++) {
-      const angle = (Math.PI * 2 * i) / particleCount;
-      const speed = Math.random() * 20 + 15; // Reduced from 50+30 to 20+15
-      newParticles.push({
-        id: i,
-        x: 0,
-        y: 0,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        velocityX: Math.cos(angle) * speed,
-        velocityY: Math.sin(angle) * speed,
-      });
-    }
-
-    setParticles(newParticles);
-
-    // Start fade out immediately
+    // Trigger animation on next frame
     requestAnimationFrame(() => {
+      setShouldAnimate(true);
       setOpacity(0);
     });
 
@@ -61,7 +57,8 @@ export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [x, y, onComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   return (
     <div
@@ -81,7 +78,9 @@ export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
             height: "6px",
             background: particle.color,
             borderRadius: "1px",
-            transform: `translate(${particle.velocityX}px, ${particle.velocityY}px)`,
+            transform: shouldAnimate
+              ? `translate(${particle.velocityX}px, ${particle.velocityY}px)`
+              : "translate(0, 0)",
             opacity: opacity,
             transition: "opacity 200ms ease-out, transform 200ms ease-out",
           }}

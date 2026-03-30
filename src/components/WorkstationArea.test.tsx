@@ -13,7 +13,7 @@ describe("WorkstationArea", () => {
         fc.property(fc.constantFrom(...emojis), (emoji) => {
           const { container } = render(<WorkstationArea stressEmoji={emoji} />);
           const text = container.textContent;
-          expect(text).toBe(`💻${emoji}💻`);
+          expect(text).toBe(`🔥💻${emoji}💻🔥`);
         }),
         { numRuns: 100 },
       );

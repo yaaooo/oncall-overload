@@ -1,4 +1,5 @@
 import React from "react";
+import { RetroButton } from "../components/RetroButton";
 
 interface StartScreenProps {
   highScore: number;
@@ -68,34 +69,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
       </div>
 
       {/* Start Button */}
-      <button
-        onClick={onStart}
-        style={{
-          fontFamily: "'Press Start 2P', 'Courier New', monospace",
-          fontSize: "14px",
-          padding: "15px 30px",
-          background: "var(--accent)",
-          color: "var(--bg-play-area)",
-          border: "3px solid var(--accent)",
-          cursor: "pointer",
-          transition: "all 0.2s",
-          boxShadow: "4px 4px 0 var(--primary-text)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "var(--bg-play-area)";
-          e.currentTarget.style.color = "var(--primary-text)";
-          e.currentTarget.style.transform = "translate(2px, 2px)";
-          e.currentTarget.style.boxShadow = "2px 2px 0 var(--accent)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "var(--primary-text)";
-          e.currentTarget.style.color = "var(--bg-play-area)";
-          e.currentTarget.style.transform = "translate(0, 0)";
-          e.currentTarget.style.boxShadow = "4px 4px 0 var(--accent)";
-        }}
-      >
-        Start
-      </button>
+      <RetroButton onClick={onStart}>Start</RetroButton>
     </div>
   );
 };

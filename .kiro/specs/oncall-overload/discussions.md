@@ -762,3 +762,239 @@ Ready for browser validation:
 3. **Better UX:** Game over screen preserves final state showing 😵 emoji
 4. **Maintainability:** Easy to add new state properties in one place
 5. **Testability:** Reset logic is explicit and testable
+
+
+---
+
+## Issue #3: Missing Ticket Resolution Animations
+
+**Date:** 2026-03-29  
+**Status:** Identified  
+**Severity:** Medium - Game is playable but lacks visual feedback
+
+### Problem Description
+
+When clicking on a ticket to resolve it, no visual animation plays. The ticket simply disappears without any feedback. According to Requirement 18.1, there should be a pixel burst animation showing colored particles scattering outward.
+
+Similarly, when a ticket breaches the workstation area, there should be:
+- Glitch dissolve animation on the ticket (Requirement 18.2)
+- Red screen flash overlay (Requirement 18.3)
+
+### Root Cause Analysis
+
+**Animation components exist but are not wired up:**
+
+1. ✅ `PixelBurst.tsx` component exists and works
+2. ✅ `GlitchDissolve.tsx` component exists
+3. ✅ `RedFlash.tsx` component exists
+4. ❌ `PlayArea.tsx` doesn't render any animations
+5. ❌ No state management for tracking active animations
+6. ❌ Input handler doesn't trigger animations on ticket resolution
+7. ❌ Game loop doesn't trigger animations on breach
+
+**Current flow (missing animations):**
+```
+User taps ticket
+  ↓
+useInputHandler detects hit
+  ↓
+Calls onResolve(ticket)
+  ↓
+GameContainer removes ticket from state
+  ↓
+Ticket disappears (no animation) ❌
+```
+
+**Expected flow (with animations):**
+```
+User taps ticket
+  ↓
+useInputHandler detects hit
+  ↓
+Trigger PixelBurst animation at ticket position ✨
+  ↓
+Calls onResolve(ticket)
+  ↓
+GameContainer removes ticket from state
+  ↓
+Animation completes after 200ms
+```
+
+### Proposed Solution
+
+#### Option 1: Animation State in PlayArea (Recommended)
+
+Add animation state management to PlayArea component:
+
+```typescript
+interface PlayAreaProps {
+  tickets: Ticket[];
+  stressEmoji: StressEmoji;
+  onTicketClick?: (ticket: Ticket) => void; // New prop
+}
+
+export const PlayArea: React.FC<PlayAreaProps> = ({ 
+  tickets, 
+  stressEmoji,
+  onTicketClick 
+}) => {
+  const [pixelBursts, setPixelBursts] = useState<Array<{id: string, x: number, y: number}>>([]);
+  const [glitchDissolves, setGlitchDissolves] = useState<Array<{id: string, x: number, y: number}>>([]);
+  const [showRedFlash, setShowRedFlash] = useState(false);
+
+  const handleTicketClick = (ticket: Ticket) => {
+    // Trigger pixel burst animation
+    setPixelBursts(prev => [...prev, { id: ticket.id, x: ticket.x, y: ticket.y }]);
+    
+    // Notify parent to remove ticket
+    if (onTicketClick) {
+      onTicketClick(ticket);
+    }
+  };
+
+  return (
+    <div>
+      {/* Tickets */}
+      {tickets.map(ticket => (
+        <TicketEntity 
+          key={ticket.id}
+          {...ticket}
+          onClick={() => handleTicketClick(ticket)}
+        />
+      ))}
+      
+      {/* Animations */}
+      {pixelBursts.map(burst => (
+        <PixelBurst
+          key={burst.id}
+          x={burst.x}
+          y={burst.y}
+          onComplete={() => setPixelBursts(prev => prev.filter(b => b.id !== burst.id))}
+        />
+      ))}
+      
+      {glitchDissolves.map(glitch => (
+        <GlitchDissolve
+          key={glitch.id}
+          x={glitch.x}
+          y={glitch.y}
+          onComplete={() => setGlitchDissolves(prev => prev.filter(g => g.id !== glitch.id))}
+        />
+      ))}
+      
+      {showRedFlash && (
+        <RedFlash onComplete={() => setShowRedFlash(false)} />
+      )}
+      
+      <WorkstationArea stressEmoji={stressEmoji} />
+    </div>
+  );
+};
+```
+
+**Pros:**
+- Animations managed close to where they're rendered
+- Clean separation of concerns
+- Easy to test
+
+**Cons:**
+- Adds state management to PlayArea
+- Need to pass callbacks through props
+
+#### Option 2: Animation State in GameContainer
+
+Manage animations at the GameContainer level alongside game state.
+
+**Pros:**
+- Centralized state management
+- Easier to coordinate with game logic
+
+**Cons:**
+- More complex GameContainer
+- Animations coupled with game state
+
+#### Option 3: Animation Queue in useGameLoop
+
+Add animation queue to the game loop ref.
+
+**Pros:**
+- Animations part of game state
+- No extra React state
+
+**Cons:**
+- Mixing concerns (game logic + visual effects)
+- Harder to trigger React re-renders for animations
+
+### Recommended Approach
+
+**Option 1 (Animation State in PlayArea)** is best because:
+1. Animations are visual concerns, belong in presentation layer
+2. Keeps GameContainer focused on game logic
+3. Easy to add/remove animations without touching game state
+4. Follows React best practices (UI state in UI components)
+
+### Implementation Plan
+
+#### Phase 1: Pixel Burst on Resolution
+1. Add animation state to PlayArea
+2. Update TicketEntity to accept onClick prop
+3. Wire up click handler to trigger PixelBurst
+4. Update useInputHandler to work with new flow
+5. Test animation triggers correctly
+
+#### Phase 2: Breach Animations
+1. Add breach animation trigger to PlayArea
+2. Wire up GlitchDissolve for breached tickets
+3. Wire up RedFlash overlay
+4. Update useGameLoop to notify PlayArea of breaches
+5. Test animations on breach
+
+#### Phase 3: Polish
+1. Ensure animations don't block gameplay (Requirement 18.4)
+2. Verify 200ms timing for pixel burst and glitch dissolve
+3. Verify 150ms timing for red flash
+4. Test multiple simultaneous animations
+5. Performance check (maintain 60fps)
+
+### Alternative: Simpler Approach
+
+If full animation system is too complex for now, could add simple CSS transitions:
+
+```typescript
+// In TicketEntity
+const [isResolving, setIsResolving] = useState(false);
+
+const handleClick = () => {
+  setIsResolving(true);
+  setTimeout(() => {
+    if (onResolve) onResolve();
+  }, 200);
+};
+
+return (
+  <div
+    style={{
+      ...baseStyles,
+      opacity: isResolving ? 0 : 1,
+      transform: isResolving ? 'scale(1.5)' : 'scale(1)',
+      transition: 'all 200ms ease-out'
+    }}
+    onClick={handleClick}
+  >
+    {emoji}
+  </div>
+);
+```
+
+This provides basic visual feedback without complex animation state management.
+
+### Related Requirements
+
+- **Requirement 18.1**: Pixel burst animation on resolution
+- **Requirement 18.2**: Glitch dissolve on breach
+- **Requirement 18.3**: Red flash on breach
+- **Requirement 18.4**: Animations must be non-blocking
+
+### Notes
+
+This is a polish/UX issue rather than a critical bug. The game is fully playable without animations, but they significantly improve the feel and satisfaction of gameplay. Should be prioritized after core functionality is stable.

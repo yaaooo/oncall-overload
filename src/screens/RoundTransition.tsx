@@ -49,11 +49,11 @@ export const RoundTransition: React.FC<RoundTransitionProps> = ({
       <div
         style={{
           fontSize: "32px",
-          color: "var(--secondary-text)",
+          color: "var(--accent)",
           textAlign: "center",
           opacity: opacity,
           transition: "opacity 0.5s ease-in-out",
-          textShadow: "0 0 10px var(--secondary-text)",
+          textShadow: "0 0 10px var(--accent)",
         }}
       >
         {dayName}

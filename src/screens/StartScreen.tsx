@@ -74,12 +74,12 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           fontFamily: "'Press Start 2P', 'Courier New', monospace",
           fontSize: "14px",
           padding: "15px 30px",
-          background: "var(--primary-text)",
+          background: "var(--accent)",
           color: "var(--bg-play-area)",
-          border: "3px solid var(--primary-text)",
+          border: "3px solid var(--accent)",
           cursor: "pointer",
           transition: "all 0.2s",
-          boxShadow: "4px 4px 0 var(--accent)",
+          boxShadow: "4px 4px 0 var(--primary-text)",
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = "var(--bg-play-area)";

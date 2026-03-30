@@ -52,7 +52,7 @@ export const GameOver: React.FC<GameOverProps> = ({
           fontSize: "14px",
           marginBottom: "60px",
           textAlign: "center",
-          color: "var(--primary-text)",
+          color: "var(--secondary-text)",
         }}
       >
         <div style={{ marginBottom: "10px" }}>Final Score</div>

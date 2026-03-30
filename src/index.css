@@ -9,10 +9,10 @@
 :root {
   --bg-play-area: #1a1a2e;
   --bg-workstation: #0d0d1a;
-  --primary-text: #00ff00;
-  --secondary-text: #ffff00;
-  --accent: #ff00ff;
-  --workstation-border: #00ff00;
+  --primary-text: #00ffcc;
+  --secondary-text: #00F3FF;
+  --accent: #ffff00;
+  --workstation-border: #00ffcc;
 }
 
 body {

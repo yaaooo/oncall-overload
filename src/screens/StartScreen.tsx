@@ -50,11 +50,14 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           color: "var(--primary-text)",
         }}
       >
-        <p style={{ marginBottom: "20px" }}>Survive for seven days</p>
-        <p style={{ marginBottom: "20px" }}>
-          Miss too many tickets and you lose
+        <p style={{ color: "var(--accent)", marginBottom: "20px" }}>
+          An oncall arcade game for software engineers
         </p>
-        <p>Clear 10 tickets to boost your mood</p>
+        <p style={{ marginBottom: "20px" }}>1. Survive for 7 days</p>
+        <p style={{ marginBottom: "20px" }}>
+          2. Miss too many tickets and you lose
+        </p>
+        <p>3. Boost your mood by clearing tickets</p>
       </div>
 
       {/* High Score */}

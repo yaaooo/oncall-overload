@@ -16,7 +16,12 @@ describe("PlayArea", () => {
           });
 
           const { container } = render(
-            <PlayArea tickets={[]} stressEmoji="🤨" />,
+            <PlayArea
+              tickets={[]}
+              stressEmoji="🤨"
+              animations={[]}
+              onAnimationComplete={() => {}}
+            />,
           );
 
           const playArea = container.firstChild as HTMLElement;
@@ -39,7 +44,12 @@ describe("PlayArea", () => {
           });
 
           const { container } = render(
-            <PlayArea tickets={[]} stressEmoji="🤨" />,
+            <PlayArea
+              tickets={[]}
+              stressEmoji="🤨"
+              animations={[]}
+              onAnimationComplete={() => {}}
+            />,
           );
 
           const playArea = container.firstChild as HTMLElement;
@@ -54,7 +64,14 @@ describe("PlayArea", () => {
     it("should handle orientation changes", () => {
       // This is tested at the integration level with actual orientation change events
       // Here we verify the component renders correctly
-      const { container } = render(<PlayArea tickets={[]} stressEmoji="🤨" />);
+      const { container } = render(
+        <PlayArea
+          tickets={[]}
+          stressEmoji="🤨"
+          animations={[]}
+          onAnimationComplete={() => {}}
+        />,
+      );
       expect(container.firstChild).toBeTruthy();
     });
   });

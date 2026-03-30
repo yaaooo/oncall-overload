@@ -26,7 +26,7 @@ const COLORS = [
 
 export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [isVisible, setIsVisible] = useState(true);
+  const [opacity, setOpacity] = useState(1);
 
   useEffect(() => {
     // Generate 8-12 particles
@@ -35,7 +35,7 @@ export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
 
     for (let i = 0; i < particleCount; i++) {
       const angle = (Math.PI * 2 * i) / particleCount;
-      const speed = Math.random() * 50 + 30;
+      const speed = Math.random() * 20 + 15; // Reduced from 50+30 to 20+15
       newParticles.push({
         id: i,
         x: 0,
@@ -48,9 +48,13 @@ export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
 
     setParticles(newParticles);
 
-    // Fade out after 200ms
+    // Start fade out immediately
+    requestAnimationFrame(() => {
+      setOpacity(0);
+    });
+
+    // Remove component after animation completes
     const timer = setTimeout(() => {
-      setIsVisible(false);
       if (onComplete) {
         onComplete();
       }
@@ -58,8 +62,6 @@ export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
 
     return () => clearTimeout(timer);
   }, [x, y, onComplete]);
-
-  if (!isVisible) return null;
 
   return (
     <div
@@ -80,7 +82,7 @@ export const PixelBurst: React.FC<PixelBurstProps> = ({ x, y, onComplete }) => {
             background: particle.color,
             borderRadius: "1px",
             transform: `translate(${particle.velocityX}px, ${particle.velocityY}px)`,
-            opacity: isVisible ? 1 : 0,
+            opacity: opacity,
             transition: "opacity 200ms ease-out, transform 200ms ease-out",
           }}
         />

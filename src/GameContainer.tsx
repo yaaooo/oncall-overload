@@ -18,6 +18,12 @@ interface GameContainerProps {
   initialHighScore: number;
 }
 
+interface Animation {
+  id: string;
+  x: number;
+  y: number;
+}
+
 export const GameContainer: React.FC<GameContainerProps> = ({
   initialHighScore,
 }) => {
@@ -30,6 +36,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
   const [gameLoopState, setGameLoopState] = useState<GameLoopState | null>(
     null,
   );
+
+  const [animations, setAnimations] = useState<Animation[]>([]);
 
   const playAreaRef = useRef<HTMLDivElement>(null);
   const [viewportDimensions, setViewportDimensions] = useState({
@@ -98,11 +106,22 @@ export const GameContainer: React.FC<GameContainerProps> = ({
       // Remove the resolved ticket
       newState.tickets = currentState.tickets.filter((t) => t.id !== ticket.id);
 
+      // Trigger pixel burst animation at ticket position
+      setAnimations((prev) => [
+        ...prev,
+        { id: ticket.id, x: ticket.x, y: ticket.y },
+      ]);
+
       gameLoop.setState(newState);
       setGameLoopState(newState);
     },
     [gameLoop],
   );
+
+  // Handle animation completion
+  const handleAnimationComplete = useCallback((animationId: string) => {
+    setAnimations((prev) => prev.filter((anim) => anim.id !== animationId));
+  }, []);
 
   // Handle miss
   const handleMiss = useCallback(() => {
@@ -213,6 +232,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           <PlayArea
             tickets={gameLoopState?.tickets || []}
             stressEmoji={getStressEmoji(gameLoopState?.lives)}
+            animations={animations}
+            onAnimationComplete={handleAnimationComplete}
           />
           <HUD
             score={gameLoopState?.score || 0}

@@ -4,8 +4,8 @@ import { MAX_LIVES } from "../constants";
 /**
  * Get the stress emoji corresponding to the current life count
  */
-export function getStressEmoji(lives: number): StressEmoji {
-  if (lives >= 3) return "🤨";
+export function getStressEmoji(lives: number | undefined): StressEmoji {
+  if (lives == undefined || lives >= 3) return "🤨";
   if (lives === 2) return "😟";
   if (lives === 1) return "😫";
   return "😵";

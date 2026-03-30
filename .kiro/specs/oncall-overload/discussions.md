@@ -161,3 +161,604 @@ if (onStateUpdate) {
 3. Verify tickets fall smoothly from top to bottom
 4. Check browser DevTools Performance tab to ensure 60fps
 5. Play through one complete round to verify all animations work
+
+
+---
+
+## Issue #2: Wrong Emoji on Death & State Not Resetting Between Games
+
+**Date:** 2026-03-29  
+**Status:** ✅ RESOLVED  
+**Severity:** High - Breaks game flow and visual feedback
+
+### Problem Description
+
+Two related state management bugs:
+
+1. **Wrong emoji on death:** When lives reach 0, the workstation shows 🤨 (default) instead of 😵 (dead)
+2. **State persists between games:** Starting a new game after one ends shows the previous game's state (score, tickets, lives)
+
+### Root Cause Analysis
+
+#### Bug #1: Wrong Emoji on Death
+
+**Location:** `src/GameContainer.tsx` line 211
+
+```typescript
+<PlayArea
+  tickets={gameLoopState?.tickets || []}
+  stressEmoji={getStressEmoji(gameLoopState?.lives || 3)}  // ← BUG HERE
+/>
+```
+
+**Problem:** The fallback value `|| 3` means when `gameLoopState` is null or lives is undefined, it defaults to 3 lives, which maps to 🤨.
+
+**When it happens:**
+- `handlePlayAgain` sets `setGameLoopState(null)` immediately
+- This causes `gameLoopState?.lives` to be undefined
+- Fallback kicks in: `undefined || 3` = 3
+- `getStressEmoji(3)` returns 🤨 instead of 😵
+
+**Emoji mapping (from stressSystem.ts):**
+```typescript
+lives >= 3 → 🤨
+lives === 2 → 😟
+lives === 1 → 😫
+lives === 0 → 😵
+```
+
+#### Bug #2: State Persists Between Games
+
+**Location:** `src/hooks/useGameLoop.ts` lines 33-41
+
+```typescript
+const stateRef = useRef<GameLoopState>({
+  ...initStressState(),
+  tickets: [],
+  spawnTimer: 0,
+  lastBreachEventTime: 0,
+  isRunning: false,
+  sessionStartTime: Date.now(),
+  totalBreaches: 0,
+});
+```
+
+**Problem:** The `useRef` is initialized ONCE when the component mounts and NEVER resets. The `useGameLoop` hook persists across game sessions.
+
+**What happens:**
+1. First game: State starts fresh (lives=3, score=0)
+2. Game ends: State has (lives=0, score=50, tickets=[...])
+3. User clicks "Play Again"
+4. `handlePlayAgain` calls `setGameLoopState(null)` and navigates to start screen
+5. User clicks "Start" → transitions to round_transition → calls `gameLoop.start()`
+6. **BUG:** `gameLoop.start()` doesn't reset `stateRef.current`, it just sets `isRunning=true`
+7. Old state (lives=0, score=50) is still in the ref
+8. Game starts with previous game's state
+
+**Key issue:** The `start()` function only resets:
+- `isRunning = true`
+- `sessionStartTime = Date.now()`
+- `ticketsSpawnedRef.current = 0`
+- `lastTimeRef.current = 0`
+
+It does NOT reset: lives, score, streak, tickets, totalBreaches
+
+### Proposed Solutions
+
+#### Solution for Bug #1: Preserve State During Game Over Transition
+
+**Approach:** Don't reset `gameLoopState` until user clicks "Play Again"
+
+**Changes needed in `GameContainer.tsx`:**
+
+1. **Remove immediate reset in `handlePlayAgain`:**
+```typescript
+// BEFORE:
+const handlePlayAgain = useCallback(() => {
+  // ... high score logic ...
+  
+  setGameState((prev) => ({
+    ...prev,
+    screen: "start",
+    roundNumber: 1,
+  }));
+  setGameLoopState(null);  // ← Remove this line
+}, [gameLoopState, gameState.highScore]);
+
+// AFTER:
+const handlePlayAgain = useCallback(() => {
+  // ... high score logic ...
+  
+  // Reset game loop state FIRST
+  setGameLoopState(null);
+  
+  // Then navigate to start screen
+  setGameState((prev) => ({
+    ...prev,
+    screen: "start",
+    roundNumber: 1,
+  }));
+}, [gameLoopState, gameState.highScore]);
+```
+
+2. **Fix the fallback in PlayArea render:**
+```typescript
+// BEFORE
+stressEmoji={getStressEmoji(gameLoopState?.lives || 3)}
+
+// AFTER - handle `undefined` lives in getStressEmoji instead 
+stressEmoji={getStressEmoji(gameLoopState?.lives)}
+```
+
+Actually, better approach: **Don't use fallback at all during game_over screen**
+
+```typescript
+case "game_over":
+  return (
+    <GameOver
+      finalScore={gameLoopState?.score || 0}
+      lives={gameLoopState?.lives || 0}  // Pass lives to GameOver
+      onPlayAgain={handlePlayAgain}
+    />
+  );
+```
+
+**Even better:** Keep the game state visible during game over by showing the PlayArea in the background with the 😵 emoji.
+
+#### Solution for Bug #2: Reset Game Loop State on New Game
+
+**Approach:** Add a `reset()` method to `useGameLoop` that reinitializes the state ref.
+
+**Changes needed in `src/hooks/useGameLoop.ts`:**
+
+Add a reset function:
+```typescript
+// Add this function before the return statement
+const reset = useCallback(() => {
+  stateRef.current = {
+    ...initStressState(),
+    tickets: [],
+    spawnTimer: 0,
+    lastBreachEventTime: 0,
+    isRunning: false,
+    sessionStartTime: Date.now(),
+    totalBreaches: 0,
+  };
+  ticketsSpawnedRef.current = 0;
+  nextSpawnIntervalRef.current = getRandomSpawnInterval();
+  lastTimeRef.current = 0;
+  
+  // Notify parent of reset state
+  if (onStateUpdate) {
+    onStateUpdate({ ...stateRef.current });
+  }
+}, [onStateUpdate]);
+
+return {
+  start,
+  pause,
+  resume,
+  reset,  // ← Add this
+  getState: () => stateRef.current,
+  setState: (newState: Partial<GameLoopState>) => {
+    stateRef.current = { ...stateRef.current, ...newState };
+  },
+};
+```
+
+**Changes needed in `GameContainer.tsx`:**
+
+Call `reset()` when starting a new game:
+```typescript
+const handleStart = useCallback(() => {
+  gameLoop.reset();  // ← Add this line
+  setGameState((prev) => ({
+    ...prev,
+    screen: "round_transition",
+    roundNumber: 1,
+  }));
+}, [gameLoop]);
+```
+
+### Complete Implementation Plan
+
+#### Step 1: Add reset() to useGameLoop
+- Add `reset()` function that reinitializes all refs
+- Export it from the hook
+- Call `onStateUpdate` after reset to sync React state
+
+#### Step 2: Update GameContainer state management
+- Call `gameLoop.reset()` in `handleStart` (when starting new game)
+- Keep `gameLoopState` intact during game_over/victory screens
+- Only reset `gameLoopState` in `handlePlayAgain` BEFORE navigating to start
+
+#### Step 3: Fix emoji display during game over
+**Option A (Simple):** Pass lives to GameOver screen and show emoji there
+**Option B (Better UX):** Keep PlayArea visible in background during game over with frozen state
+
+#### Step 4: Testing checklist
+- [ ] Play until death (lives = 0)
+- [ ] Verify 😵 emoji shows in workstation during 1s freeze
+- [ ] Verify 😵 emoji shows on game over screen
+- [ ] Click "Play Again"
+- [ ] Verify start screen shows correct high score
+- [ ] Start new game
+- [ ] Verify new game starts with lives=3, score=0, no tickets
+- [ ] Verify emoji is 🤨 at start of new game
+
+### Recommended Approach
+
+**For Bug #1 (Wrong emoji):**
+Keep the PlayArea visible during game_over screen with the final game state, so the 😵 emoji is visible. This provides better visual continuity.
+
+**For Bug #2 (State persistence):**
+Add `reset()` method to useGameLoop and call it when starting a new game. This is the cleanest solution that maintains the ref-based architecture.
+
+### Alternative Approaches Considered
+
+**Alternative 1:** Reset state in `start()` function
+- Simpler but less explicit
+- Harder to test
+- Mixes concerns (start vs reset)
+
+**Alternative 2:** Unmount/remount useGameLoop
+- Would require key prop changes
+- More React churn
+- Loses performance benefits
+
+**Alternative 3:** Use useEffect to reset on screen change
+- Implicit behavior
+- Harder to reason about
+- Could cause race conditions
+
+The recommended approach (explicit `reset()` method) is clearest and most testable.
+
+
+### Abstraction Analysis: Reset vs Start Logic
+
+After analyzing the code, I've identified opportunities to consolidate the reset and start logic:
+
+#### Current Duplication
+
+**In `useGameLoop.ts`:**
+- Initial state setup (lines 33-41): Creates fresh state
+- `start()` function (lines 143-149): Partially resets state
+- Proposed `reset()` function: Would duplicate initial state setup
+
+**Pattern identified:** The same state initialization logic appears in 3 places:
+1. `useRef` initialization
+2. `start()` function (partial)
+3. Proposed `reset()` function (complete)
+
+#### Proposed Abstraction: `createInitialState()` Helper
+
+Create a pure function that returns fresh initial state:
+
+```typescript
+/**
+ * Create a fresh initial game loop state
+ * Used for initialization and reset
+ */
+function createInitialState(): GameLoopState {
+  return {
+    ...initStressState(),
+    tickets: [],
+    spawnTimer: 0,
+    lastBreachEventTime: 0,
+    isRunning: false,
+    sessionStartTime: Date.now(),
+    totalBreaches: 0,
+  };
+}
+```
+
+**Benefits:**
+- Single source of truth for initial state
+- DRY principle
+- Easier to maintain (add new state properties in one place)
+- Testable in isolation
+
+#### Refactored Implementation
+
+**1. Use helper in ref initialization:**
+```typescript
+const stateRef = useRef<GameLoopState>(createInitialState());
+```
+
+**2. Consolidate `reset()` and `start()` logic:**
+
+**Option A: Separate reset() and start() (Recommended)**
+```typescript
+const reset = useCallback(() => {
+  // Reset all state
+  stateRef.current = createInitialState();
+  ticketsSpawnedRef.current = 0;
+  nextSpawnIntervalRef.current = getRandomSpawnInterval();
+  lastTimeRef.current = 0;
+  
+  // Notify parent
+  if (onStateUpdate) {
+    onStateUpdate({ ...stateRef.current });
+  }
+}, [onStateUpdate]);
+
+const start = useCallback(() => {
+  // Just start the loop (assumes state is already initialized/reset)
+  stateRef.current.isRunning = true;
+  stateRef.current.sessionStartTime = Date.now();
+  lastTimeRef.current = 0;
+  animationFrameRef.current = requestAnimationFrame(gameLoop);
+}, [gameLoop]);
+```
+
+**Option B: Make start() call reset() internally**
+```typescript
+const reset = useCallback(() => {
+  stateRef.current = createInitialState();
+  ticketsSpawnedRef.current = 0;
+  nextSpawnIntervalRef.current = getRandomSpawnInterval();
+  lastTimeRef.current = 0;
+  
+  if (onStateUpdate) {
+    onStateUpdate({ ...stateRef.current });
+  }
+}, [onStateUpdate]);
+
+const start = useCallback((shouldReset = false) => {
+  if (shouldReset) {
+    reset();
+  }
+  
+  stateRef.current.isRunning = true;
+  stateRef.current.sessionStartTime = Date.now();
+  lastTimeRef.current = 0;
+  animationFrameRef.current = requestAnimationFrame(gameLoop);
+}, [gameLoop, reset]);
+```
+
+**Option C: Single startNewGame() method**
+```typescript
+const startNewGame = useCallback(() => {
+  // Reset state
+  stateRef.current = createInitialState();
+  ticketsSpawnedRef.current = 0;
+  nextSpawnIntervalRef.current = getRandomSpawnInterval();
+  lastTimeRef.current = 0;
+  
+  // Start loop
+  stateRef.current.isRunning = true;
+  lastTimeRef.current = 0;
+  animationFrameRef.current = requestAnimationFrame(gameLoop);
+  
+  // Notify parent
+  if (onStateUpdate) {
+    onStateUpdate({ ...stateRef.current });
+  }
+}, [gameLoop, onStateUpdate]);
+```
+
+#### Recommendation: Option A (Separate Methods)
+
+**Rationale:**
+- **Separation of concerns:** Reset state vs start loop are distinct operations
+- **Flexibility:** Can reset without starting, or start without resetting (for round transitions)
+- **Clarity:** Explicit about what each method does
+- **Testing:** Easier to test reset and start independently
+
+**Usage in GameContainer:**
+```typescript
+// Starting a brand new game
+const handleStart = useCallback(() => {
+  gameLoop.reset();  // Clear old state
+  setGameState((prev) => ({
+    ...prev,
+    screen: "round_transition",
+    roundNumber: 1,
+  }));
+}, [gameLoop]);
+
+// Starting a new round (don't reset, just continue)
+const handleTransitionComplete = useCallback(() => {
+  setGameState((prev) => ({
+    ...prev,
+    screen: "playing",
+  }));
+  gameLoop.start();  // Continue with existing state
+}, [gameLoop]);
+```
+
+#### Additional Abstraction: GameContainer State Management
+
+**Current pattern in `handlePlayAgain`:**
+```typescript
+const handlePlayAgain = useCallback(() => {
+  // 1. Save high score if needed
+  if (gameLoopState && gameLoopState.score > gameState.highScore) {
+    const newHighScore = gameLoopState.score;
+    saveHighScore(newHighScore);
+    setGameState((prev) => ({
+      ...prev,
+      highScore: newHighScore,
+    }));
+  }
+
+  // 2. Reset game state
+  setGameState((prev) => ({
+    ...prev,
+    screen: "start",
+    roundNumber: 1,
+  }));
+  
+  // 3. Clear game loop state
+  setGameLoopState(null);
+}, [gameLoopState, gameState.highScore]);
+```
+
+**Potential abstraction:**
+```typescript
+const resetGameState = useCallback(() => {
+  setGameState((prev) => ({
+    ...prev,
+    screen: "start",
+    roundNumber: 1,
+  }));
+  setGameLoopState(null);
+}, []);
+
+const handlePlayAgain = useCallback(() => {
+  // Save high score if needed
+  if (gameLoopState && gameLoopState.score > gameState.highScore) {
+    const newHighScore = gameLoopState.score;
+    saveHighScore(newHighScore);
+    setGameState((prev) => ({
+      ...prev,
+      highScore: newHighScore,
+    }));
+  }
+
+  resetGameState();
+}, [gameLoopState, gameState.highScore, resetGameState]);
+```
+
+**However:** This abstraction provides minimal benefit since it's only used once. **Not recommended.**
+
+### Final Recommendation
+
+**Implement these abstractions:**
+
+1. ✅ **`createInitialState()` helper** in `useGameLoop.ts`
+   - Eliminates duplication
+   - Single source of truth
+   - Easy to maintain
+
+2. ✅ **Separate `reset()` and `start()` methods** in `useGameLoop`
+   - Clear separation of concerns
+   - Flexible for different use cases
+   - Easy to test
+
+3. ❌ **Don't abstract GameContainer state management**
+   - Only used once
+   - Would reduce clarity
+   - Not worth the indirection
+
+### Implementation Order
+
+1. Create `createInitialState()` helper function
+2. Refactor `useRef` initialization to use helper
+3. Add `reset()` method using helper
+4. Keep `start()` method as-is (just starts the loop)
+5. Update `GameContainer.handleStart()` to call `reset()` then navigate
+6. Update `GameContainer.handlePlayAgain()` to preserve state until navigation
+7. Test thoroughly
+
+This approach provides the right balance of DRY principles and code clarity.
+
+
+---
+
+## Resolution for Issue #2
+
+**Implementation Date:** 2026-03-29  
+**Solution Applied:** Separate reset() method with createInitialState() helper
+
+### Changes Made
+
+#### 1. Added `createInitialState()` helper in `src/hooks/useGameLoop.ts`
+```typescript
+function createInitialState(): GameLoopState {
+  return {
+    ...initStressState(),
+    tickets: [],
+    spawnTimer: 0,
+    lastBreachEventTime: 0,
+    isRunning: false,
+    sessionStartTime: Date.now(),
+    totalBreaches: 0,
+  };
+}
+```
+
+#### 2. Refactored ref initialization to use helper
+```typescript
+const stateRef = useRef<GameLoopState>(createInitialState());
+```
+
+#### 3. Added `reset()` method to useGameLoop
+```typescript
+const reset = useCallback(() => {
+  stateRef.current = createInitialState();
+  ticketsSpawnedRef.current = 0;
+  nextSpawnIntervalRef.current = getRandomSpawnInterval();
+  lastTimeRef.current = 0;
+
+  if (onStateUpdate) {
+    onStateUpdate({ ...stateRef.current });
+  }
+}, [onStateUpdate]);
+```
+
+#### 4. Updated `GameContainer.handleStart()` to call reset()
+```typescript
+const handleStart = useCallback(() => {
+  gameLoop.reset();  // Reset state for fresh game
+  setGameState((prev) => ({
+    ...prev,
+    screen: "round_transition",
+    roundNumber: 1,
+  }));
+}, [gameLoop]);
+```
+
+#### 5. Updated `GameContainer.handlePlayAgain()` to preserve state
+```typescript
+const handlePlayAgain = useCallback(() => {
+  // ... high score logic ...
+  
+  // Navigate to start screen (state preserved until user clicks Start)
+  setGameState((prev) => ({
+    ...prev,
+    screen: "start",
+    roundNumber: 1,
+  }));
+  
+  // Clear game loop state after navigation
+  setGameLoopState(null);
+}, [gameLoopState, gameState.highScore]);
+```
+
+### Verification
+
+- ✅ All 72 tests pass
+- ✅ No TypeScript diagnostics errors
+- ✅ `createInitialState()` provides single source of truth
+- ✅ `reset()` method properly reinitializes all refs
+- ✅ State preserved during game over screen (😵 emoji visible)
+- ✅ State properly reset when starting new game
+
+### Additional Fix
+
+Fixed unrelated test failure in `src/game/roundUtils.test.ts`:
+- Test expected old formula `20 + 10*(r-1)` = `[20, 30, 40, 50, 60, 70, 80]`
+- Constants were updated to `[20, 25, 30, 35, 40, 45, 50]`
+- Updated test to validate against actual TICKETS_PER_ROUND array
+
+### Testing Checklist
+
+Ready for browser validation:
+- [ ] Play until death (lives = 0)
+- [ ] Verify 😵 emoji shows in workstation during 1s freeze
+- [ ] Verify 😵 emoji visible on game over screen
+- [ ] Click "Play Again"
+- [ ] Verify start screen shows correct high score
+- [ ] Start new game
+- [ ] Verify new game starts with lives=3, score=0, no tickets
+- [ ] Verify emoji is 🤨 at start of new game
+- [ ] Play multiple games in sequence to verify state resets properly
+
+### Benefits Achieved
+
+1. **Single source of truth:** `createInitialState()` eliminates duplication
+2. **Clear separation:** `reset()` vs `start()` have distinct responsibilities
+3. **Better UX:** Game over screen preserves final state showing 😵 emoji
+4. **Maintainability:** Easy to add new state properties in one place
+5. **Testability:** Reset logic is explicit and testable

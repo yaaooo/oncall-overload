@@ -27,7 +27,7 @@ export const WorkstationArea: React.FC<WorkstationAreaProps> = ({
         userSelect: "none",
       }}
     >
-      💻{stressEmoji}💻
+      💻{stressEmoji}🖥️
     </div>
   );
 };

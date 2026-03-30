@@ -124,12 +124,15 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
   // Handle start game
   const handleStart = useCallback(() => {
+    // Reset game loop state for a fresh game
+    gameLoop.reset();
+
     setGameState((prev) => ({
       ...prev,
       screen: "round_transition",
       roundNumber: 1,
     }));
-  }, []);
+  }, [gameLoop]);
 
   // Handle round transition complete
   const handleTransitionComplete = useCallback(() => {
@@ -152,14 +155,16 @@ export const GameContainer: React.FC<GameContainerProps> = ({
       }));
     }
 
-    // Reset game state
+    // Navigate to start screen (state will be reset when user clicks Start)
     setGameState((prev) => ({
       ...prev,
       screen: "start",
       roundNumber: 1,
     }));
+
+    // Clear game loop state after navigation
     setGameLoopState(null);
-  }, [gameLoopState, gameState.highScore, gameLoop]);
+  }, [gameLoopState, gameState.highScore]);
 
   // Update high score on game over or victory
   useEffect(() => {
@@ -207,7 +212,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         >
           <PlayArea
             tickets={gameLoopState?.tickets || []}
-            stressEmoji={getStressEmoji(gameLoopState?.lives || 3)}
+            stressEmoji={getStressEmoji(gameLoopState?.lives)}
           />
           <HUD
             score={gameLoopState?.score || 0}

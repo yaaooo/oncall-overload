@@ -28,12 +28,10 @@ describe("roundUtils", () => {
   });
 
   describe("Feature: oncall-overload, Property 36: Ticket Count Per Round", () => {
-    it("should return correct ticket count for each round (20 + 10*(r-1))", () => {
+    it("should return correct ticket count for each round from TICKETS_PER_ROUND array", () => {
       fc.assert(
         fc.property(fc.integer({ min: 1, max: 7 }), (round) => {
           const ticketCount = getTicketsForRound(round);
-          const expected = 20 + 10 * (round - 1);
-          expect(ticketCount).toBe(expected);
           expect(ticketCount).toBe(TICKETS_PER_ROUND[round - 1]);
         }),
         { numRuns: 100 },

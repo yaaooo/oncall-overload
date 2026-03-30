@@ -15,6 +15,22 @@ interface UseGameLoopOptions {
   onStateUpdate?: (state: GameLoopState) => void;
 }
 
+/**
+ * Create a fresh initial game loop state
+ * Used for initialization and reset
+ */
+function createInitialState(): GameLoopState {
+  return {
+    ...initStressState(),
+    tickets: [],
+    spawnTimer: 0,
+    lastBreachEventTime: 0,
+    isRunning: false,
+    sessionStartTime: Date.now(),
+    totalBreaches: 0,
+  };
+}
+
 export function useGameLoop({
   viewportWidth,
   viewportHeight,
@@ -24,15 +40,7 @@ export function useGameLoop({
   onGameOver,
   onStateUpdate,
 }: UseGameLoopOptions) {
-  const stateRef = useRef<GameLoopState>({
-    ...initStressState(),
-    tickets: [],
-    spawnTimer: 0,
-    lastBreachEventTime: 0,
-    isRunning: false,
-    sessionStartTime: Date.now(),
-    totalBreaches: 0,
-  });
+  const stateRef = useRef<GameLoopState>(createInitialState());
 
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -189,10 +197,24 @@ export function useGameLoop({
     };
   }, []);
 
+  // Reset game loop state to initial values
+  const reset = useCallback(() => {
+    stateRef.current = createInitialState();
+    ticketsSpawnedRef.current = 0;
+    nextSpawnIntervalRef.current = getRandomSpawnInterval();
+    lastTimeRef.current = 0;
+
+    // Notify parent of reset state
+    if (onStateUpdate) {
+      onStateUpdate({ ...stateRef.current });
+    }
+  }, [onStateUpdate]);
+
   return {
     start,
     pause,
     resume,
+    reset,
     getState: () => stateRef.current,
     setState: (newState: Partial<GameLoopState>) => {
       stateRef.current = { ...stateRef.current, ...newState };
